@@ -4,7 +4,7 @@ import axiosInstance from "../config/axiosInstance";
 
 interface CategoriesDTO {
     id?: number;
-    name: string;
+    nameCate: string;
     description?: string;
     imageUrl?: string; // Nếu có đường dẫn ảnh lưu rồi
 }
@@ -17,7 +17,7 @@ interface AddCategoryModalProps {
 }
 
 export default function AddCategoryModal({ open, onClose, onAddOrUpdate, initialCategory }: AddCategoryModalProps) {
-    const [name, setName] = useState("");
+    const [nameCate, setNameCate] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -25,13 +25,13 @@ export default function AddCategoryModal({ open, onClose, onAddOrUpdate, initial
 
     useEffect(() => {
         if (initialCategory) {
-            setName(initialCategory.name || "");
+            setNameCate(initialCategory.nameCate || "");
             setDescription(initialCategory.description || "");
             setPreviewUrl(initialCategory.imageUrl || null);
             setImage(null); // ban đầu không đổi ảnh
         } else {
             // reset form nếu không có category sửa
-            setName("");
+            setNameCate("");
             setDescription("");
             setImage(null);
             setPreviewUrl(null);
@@ -39,16 +39,17 @@ export default function AddCategoryModal({ open, onClose, onAddOrUpdate, initial
     }, [initialCategory, open]);
 
     const handleSubmit = async () => {
-        if (!name) return;
+        if (!nameCate) return;
 
-        const categoryDTO = { name, description };
+        const categoryDTO = { nameCate, description };
         const formData = new FormData();
-        formData.append("categoryDTO", JSON.stringify(categoryDTO));
+        formData.append("categoryDTO", new Blob([JSON.stringify(categoryDTO)], { type: "application/json" }));
         if (image) {
             formData.append("image", image);
         }
 
         try {
+            console.log("Submitting category:", categoryDTO, "with image:", image);
             if (initialCategory && initialCategory.id) {
                 // Gọi API sửa
                 await axiosInstance.put(`/category/update/${initialCategory.id}`, formData, {
@@ -71,7 +72,7 @@ export default function AddCategoryModal({ open, onClose, onAddOrUpdate, initial
                 onAddOrUpdate();
                 onClose();
                 setSuccessMessage(null);
-                setName("");
+                setNameCate("");
                 setDescription("");
                 setImage(null);
                 setPreviewUrl(null);
@@ -96,8 +97,8 @@ export default function AddCategoryModal({ open, onClose, onAddOrUpdate, initial
                 <input
                     className="w-full border px-3 py-2 mb-3 rounded"
                     placeholder="Tên danh mục"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={nameCate}
+                    onChange={(e) => setNameCate(e.target.value)}
                 />
 
                 <input

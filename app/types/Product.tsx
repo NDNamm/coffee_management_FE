@@ -1,6 +1,6 @@
 interface Product {
     id: number;
-    name: string;
+    namePro: string;
     price: number;
     description: string;
     imageUrl: string; // ảnh đại diện

@@ -24,16 +24,13 @@ export default function OrderModal({
     onAddOrUpdate,
     initialOrder,
 }: OrderModalProps) {
-    const [name, setName] = useState("");
     const [status, setStatus] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialOrder) {
-            setName(initialOrder.name || "");
             setStatus(initialOrder.status || "");
         } else {
-            setName("");
             setStatus("");
         }
     }, [initialOrder, open]);
@@ -51,7 +48,6 @@ export default function OrderModal({
         }
 
         const orderDTO = {
-            name,
             status,
         };
 
@@ -59,12 +55,8 @@ export default function OrderModal({
         const sessionId = initialOrder.sessionId || "";
 
         try {
-            const url =
-                userId !== 0
-                    ? `/order/update/${userId}/${initialOrder.id}`
-                    : `/order/update/${userId}/${initialOrder.id}?sessionId=${sessionId}`;
 
-            await axiosInstance.put(url, orderDTO);
+            await axiosInstance.put(`/order/update/${initialOrder.id}`, orderDTO);
 
             setSuccessMessage("Cập nhật đơn hàng thành công!");
             setTimeout(() => {
@@ -89,13 +81,6 @@ export default function OrderModal({
                 )}
 
                 <Dialog.Title className="text-lg font-semibold mb-4">Cập nhật Đơn Hàng</Dialog.Title>
-
-                <input
-                    className="w-full border px-3 py-2 mb-3 rounded"
-                    placeholder="Tên đơn hàng"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
 
                 <select
                     className="w-full border px-3 py-2 mb-3 rounded"

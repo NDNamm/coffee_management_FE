@@ -24,7 +24,7 @@ export default function SearchProductPage() {
                 const res = await axiosInstance.get(
                     `/product/search?name=${encodeURIComponent(query)}`
                 );
-                setProducts(res.data.content || []);
+                setProducts(res.data.data?.content || []);
             } catch (err) {
                 console.error("Lỗi tìm kiếm:", err);
                 setError("Đã xảy ra lỗi khi tìm kiếm sản phẩm.");
@@ -83,11 +83,11 @@ export default function SearchProductPage() {
                                     <div className="flex-grow flex items-center gap-4">
                                         <img
                                             src={item.imageUrl || "/default.png"}
-                                            alt={item.name}
+                                            alt={item.namePro}
                                             className="w-18 h-18 rounded-full object-cover border-2 border-[#8B5E3C] flex-shrink-0"
                                         />
                                         <div className="flex-grow">
-                                            <h3 className="font-bold text-gray-800 text-lg mb-1">{item.name}</h3>
+                                            <h3 className="font-bold text-gray-800 text-lg mb-1">{item.namePro}</h3>
                                             <p className="text-gray-500 text-sm line-clamp-2">{item.description}</p>
                                         </div>
                                         <div className="text-right min-w-[100px]">

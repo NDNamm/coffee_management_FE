@@ -21,7 +21,7 @@ export default function ProductModal({
     onAddOrUpdate,
     initialProduct,
 }: ProductModalProps) {
-    const [name, setName] = useState("");
+    const [namePro, setNamePro] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [status, setStatus] = useState("");
@@ -37,12 +37,12 @@ export default function ProductModal({
                 const firstRes = await axiosInstance.get("/category", {
                     params: { page: 0, size: 1 },
                 });
-                const totalElements = firstRes.data.totalElements;
+                const totalElements = firstRes.data.data.totalElements;
 
                 const fullRes = await axiosInstance.get("/category", {
                     params: { page: 0, size: totalElements },
                 });
-                setCategoryList(fullRes.data.content);
+                setCategoryList(fullRes.data.data.content);
             } catch (error) {
                 console.error("Lỗi khi load danh mục:", error);
             }
@@ -53,15 +53,19 @@ export default function ProductModal({
 
     useEffect(() => {
         if (initialProduct) {
-            setName(initialProduct.name || "");
+            setNamePro(initialProduct.namePro || "");
             setDescription(initialProduct.description || "");
             setPrice(initialProduct.price?.toString() || "");
             setStatus(initialProduct.status || "");
             setSelectedCategory(initialProduct.categoryId?.toString() || "");
             setImages([]);
-            setPreviewUrls(initialProduct.imagesDTO?.map(img => img.imageUrl) || []);
+            setPreviewUrls(
+                Array.isArray(initialProduct.imagesDTO)
+                    ? initialProduct.imagesDTO.map((img) => img.imageUrl)
+                    : []
+            );
         } else {
-            setName("");
+            setNamePro("");
             setDescription("");
             setPrice("");
             setStatus("");
@@ -71,14 +75,16 @@ export default function ProductModal({
         }
     }, [initialProduct, open]);
 
+
+
     const handleSubmit = async () => {
-        if (!name.trim() || !price || !selectedCategory) {
+        if (!namePro.trim() || !price || !selectedCategory) {
             alert("Vui lòng nhập đầy đủ tên, giá và chọn loại sản phẩm.");
             return;
         }
 
         const productDTO: any = {
-            name,
+            namePro,
             description,
             price: parseFloat(price),
         };
@@ -102,7 +108,7 @@ export default function ProductModal({
             } else {
                 if (images.length === 0) {
                     alert("Vui lòng chọn ít nhất một ảnh.");
-                    return; 
+                    return;
                 }
                 await axiosInstance.post(`/product/add/${selectedCategory}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" },
@@ -142,9 +148,9 @@ export default function ProductModal({
                         onChange={(e) => setSelectedCategory(e.target.value)}
                     >
                         <option value="">-- Chọn loại sản phẩm --</option>
-                        {categoryList.map((cat) => (
+                        {categoryList?.map((cat) => (
                             <option key={cat.id} value={cat.id}>
-                                {cat.name}
+                                {cat.nameCate}
                             </option>
                         ))}
                     </select>
@@ -153,8 +159,8 @@ export default function ProductModal({
                 <input
                     className="w-full border px-3 py-2 mb-3 rounded"
                     placeholder="Tên sản phẩm"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={namePro}
+                    onChange={(e) => setNamePro(e.target.value)}
                 />
 
                 <input
@@ -201,7 +207,7 @@ export default function ProductModal({
                     className="hidden"
                 />
 
-                {previewUrls.length > 0 && (
+                {Array.isArray(previewUrls) && previewUrls.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 mb-3">
                         {previewUrls.map((url, idx) => (
                             <img
@@ -213,6 +219,7 @@ export default function ProductModal({
                         ))}
                     </div>
                 )}
+
 
                 <label
                     htmlFor="image-upload"

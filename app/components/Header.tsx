@@ -50,8 +50,8 @@ function Header() {
         const fetchCategory = async () => {
             try {
                 const res = await axiosInstance.get(`/category?page=0&size=7`);
-                if (res.data?.content) {
-                    setCategories(res.data.content);
+                if (res.data && res.data.data && res.data.data.content) {
+                    setCategories(res.data.data.content);
                 }
             } catch (err) {
                 console.error("Error fetching categories:", err);
@@ -65,14 +65,14 @@ function Header() {
             try {
                 if (userId) {
                     const res = await axiosInstance.get("/cart");
-                    const cartItems = res.data.cartItems || [];
+                    const cartItems = res.data.data.cartItems || [];
                     const total = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
                     setCartCount(total);
                 } else {
                     const sessionId = localStorage.getItem("sessionId");
                     if (sessionId) {
                         const res = await axiosInstance.get("/cart/session", { params: { sessionId } });
-                        const cartItems = res.data.cartItems || [];
+                        const cartItems = res.data.data.cartItems || [];
                         const total = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
                         setCartCount(total);
                     } else {
@@ -151,7 +151,7 @@ function Header() {
                                         href={`/category?id=${c.id}`}
                                         className="block px-4 py-2 hover:bg-[#8B5E3C] hover:text-white transition-colors first:rounded-t-md last:rounded-b-md"
                                     >
-                                        {c.name}
+                                        {c.nameCate}
                                     </a>
                                 ))
                             ) : (

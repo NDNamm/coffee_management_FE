@@ -8,16 +8,40 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [page, setPage] = useState(0);
-  const [size] = useState(7);
+  const [size] = useState(6);
+
+  useEffect(() => {
+    const isLoggedIn = !!localStorage.getItem("accessToken");
+    const existingSessionId = localStorage.getItem("sessionId");
+
+    if (!isLoggedIn && !existingSessionId) {
+      const fetchSessionId = async () => {
+        try {
+          const res = await axiosInstance.post("cart/session/create");
+          const sessionId = res.data?.data?.sessionId;
+          if (sessionId) {
+            localStorage.setItem("sessionId", sessionId);
+            console.log("New sessionId:", sessionId);
+          }
+        } catch (err) {
+          console.error("Failed to create sessionId:", err);
+        }
+      };
+
+      fetchSessionId();
+    }
+  }, []);
+
+
 
   useEffect(() => {
     const fetchCategory = async () => {
       try {
         const response = await axiosInstance.get(`/category?page=${page}&size=${size}`);
-        if (response.data && response.data.content) {
-          setCategories(response.data.content);
-          if (response.data.content.length > 0) {
-            setSelectedCategory(response.data.content[0].id);
+        if (response.data && response.data.data && response.data.data.content) {
+          setCategories(response.data.data.content);
+          if (response.data.data.content.length > 0) {
+            setSelectedCategory(response.data.data.content[0].id);
           }
         } else {
           console.error("No categories found in the response");
@@ -35,13 +59,18 @@ export default function Home() {
       if (selectedCategory === null) return;
       try {
         const response = await axiosInstance.get(`/product/select/${selectedCategory}`);
-        setProducts(response.data || []);
+        const list = response.data?.data?.content ?? [];
+        setProducts(list);
+
       } catch (error) {
         console.error("Error fetching products by category:", error);
+        setProducts([]); // fallback tránh crash .map
       }
     };
+
     fetchProductsByCategory();
   }, [selectedCategory]);
+
 
   return (
     <div className="bg-white min-h-screen">
@@ -69,7 +98,7 @@ export default function Home() {
                   }
                 `}
               >
-                {c.name}
+                {c.nameCate}
               </button>
             ))}
           </div>
@@ -85,11 +114,11 @@ export default function Home() {
                   <div className="flex-grow flex items-center gap-4">
                     <img
                       src={item.imageUrl || "/default.png"}
-                      alt={item.name}
+                      alt={item.namePro}
                       className="w-20 h-20 rounded-full object-cover border-2 border-[#8B5E3C] flex-shrink-0"
                     />
                     <div className="flex-grow">
-                      <h3 className="font-bold text-gray-800 text-lg mb-1">{item.name}</h3>
+                      <h3 className="font-bold text-gray-800 text-lg mb-1">{item.namePro}</h3>
                       <p className="text-gray-500 text-sm line-clamp-2">{item.description}</p>
                     </div>
                     <div className="text-right min-w-[100px]">
@@ -133,7 +162,6 @@ export default function Home() {
         </div>
       </section>
       <Footer />
-
     </div>
   );
 }

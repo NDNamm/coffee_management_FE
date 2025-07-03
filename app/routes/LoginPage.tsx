@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Header from "~/components/Header";
 import axiosInstance from '../config/axiosInstance';
 import { useNavigate } from "react-router-dom";
-import { getRolesFromToken } from "~/utils/authUtils";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -13,14 +12,19 @@ export default function Login() {
         e.preventDefault();
         try {
             const response = await axiosInstance.post("auth/login", { email, password });
-            console.log("Login successful:", response.data);
-            localStorage.setItem("accessToken", response.data.token);
-            localStorage.setItem("phone", response.data.phone);
-            localStorage.setItem("fullname", response.data.fullName);
-            
+            console.log("Login successful:", response.data.data);
+            // Sau khi gọi API đăng nhập thành công:
+            localStorage.setItem("accessToken", response.data.data.token);
+            localStorage.setItem("phoneNumber", response.data.data.phoneNumber);
+            localStorage.setItem("fullname", response.data.data.fullName);
+            localStorage.setItem("userId", response.data.data.userId.toString());
+            localStorage.setItem("userRole", response.data.data.nameRole);
+
+
+
             window.dispatchEvent(new CustomEvent("userLogin", { detail: response.data.name }));
 
-            const roles = response.data.nameRole;
+            const roles = response.data.data.nameRole;
             console.log("Roles from token:", roles);
             if (roles == "ADMIN" || roles == "ROLE_ADMIN") {
                 navigate("/admin/dashboard");

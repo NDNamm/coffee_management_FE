@@ -19,8 +19,8 @@ export default function Category() {
     const fetchCategories = async () => {
       try {
         const res = await axiosInstance.get(`/category?page=${page}&size=${size}`);
-        if (res.data && res.data.content) {
-          const allCategories: Category[] = res.data.content;
+        if (res.data.data && res.data.data.content) {
+          const allCategories: Category[] = res.data.data.content;
           setCategories(allCategories);
 
           // Nếu URL có ?id= thì tìm category tương ứng
@@ -45,8 +45,8 @@ export default function Category() {
       if (!selectedCategory) return;
 
       try {
-        const res = await axiosInstance.get(`product/select/${selectedCategory.id}`);
-        setProducts(res.data || []);
+        const res = await axiosInstance.get(`product/select/${selectedCategory.id}?page=${page}&size=${size}`);
+        setProducts(res.data.data?.content || []);
       } catch (err) {
         console.error("Lỗi khi fetch sản phẩm theo category:", err);
       }
@@ -64,7 +64,7 @@ export default function Category() {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl text-[#8B5E3C] font-bold uppercase">
-              {selectedCategory?.name || 'Danh mục sản phẩm'}
+              {selectedCategory?.nameCate || 'Danh mục sản phẩm'}
             </h2>
             <div className="w-20 h-1 bg-[#8B5E3C] mx-auto mt-4"></div>
             <p className="italic text-gray-500 mt-2">Khám phá hương vị độc đáo</p>
@@ -83,7 +83,7 @@ export default function Category() {
                   }
                                 `}
               >
-                {c.name}
+                {c.nameCate}
               </button>
             ))}
           </div>
@@ -100,11 +100,11 @@ export default function Category() {
                   <div className="flex-grow flex items-center gap-4">
                     <img
                       src={item.imageUrl || "/default.png"}
-                      alt={item.name}
+                      alt={item.namePro}
                       className="w-20 h-20 rounded-full object-cover border-2 border-[#8B5E3C] flex-shrink-0"
                     />
                     <div className="flex-grow">
-                      <h3 className="font-bold text-gray-800 text-lg mb-1">{item.name}</h3>
+                      <h3 className="font-bold text-gray-800 text-lg mb-1">{item.namePro}</h3>
                       <p className="text-gray-500 text-sm line-clamp-2">{item.description}</p>
                     </div>
                     <div className="text-right min-w-[100px]">

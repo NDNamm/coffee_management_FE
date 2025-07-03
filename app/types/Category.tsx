@@ -1,6 +1,6 @@
 interface Category {
   id: number;
-  name: string;
+  nameCate: string;
   imageUrl: string;
   description: string;
   createdAt: string | Date;

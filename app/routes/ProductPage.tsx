@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Header from "~/components/Header";
 import axiosInstance from "../config/axiosInstance";
 import { getUserIdFromToken } from "~/utils/authUtils";
+import { ca } from "date-fns/locale";
 
 export default function Product() {
   const location = useLocation();
@@ -28,7 +29,7 @@ export default function Product() {
     const fetchProduct = async () => {
       try {
         const res = await axiosInstance.get(`/product/${productId}`);
-        setProduct(res.data);
+        setProduct(res.data.data);
         setLoading(false);
       } catch (err) {
         setError("Lỗi khi tải sản phẩm");
@@ -38,7 +39,7 @@ export default function Product() {
 
       try {
         const res = await axiosInstance.get(`/rating/${productId}`);
-        const ratings = res.data;
+        const ratings = res.data.data;
         setProduct((prev) =>
           prev ? { ...prev, rating: ratings } : prev
         );
@@ -73,14 +74,16 @@ export default function Product() {
   const handleAddToCart = async () => {
     if (!product) return;
     const cartItemDTO = {
-      product: { id: product.id },
+      productId: productId ,
       quantity: quantity,
       price: product.price,
     };
 
     try {
       if (userId) {
+        console.log("Gửi đi:", cartItemDTO);
         await axiosInstance.post("/cart/add", cartItemDTO);
+
       } else {
         let sessionId = localStorage.getItem("sessionId");
         if (!sessionId) {
@@ -174,7 +177,7 @@ export default function Product() {
             <div className="md:w-1/2">
               <img
                 src={product.imageUrl || "/default.png"}
-                alt={product.name}
+                alt={product.namePro}
                 className="w-full h-96 rounded-lg object-cover mb-4 border-2 border-[#8B5E3C]"
               />
               {product.imagesDTO && product.imagesDTO.length > 1 && (
@@ -198,7 +201,7 @@ export default function Product() {
 
             {/* Product Info */}
             <div className="md:w-1/2">
-              <h1 className="text-3xl font-bold text-[#2f2210] mb-4">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-[#2f2210] mb-4">{product.namePro}</h1>
 
               <div className="mb-6">
                 {product.averageRating ? (

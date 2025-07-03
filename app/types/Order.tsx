@@ -1,3 +1,4 @@
+
 interface Order {
     id: number;
     orderDate: string;
@@ -10,4 +11,6 @@ interface Order {
     user?: Users | null;
     sessionId?: string;
     orderDetailDTO: OrderDetail[];
+    addressDTO: Address;
+
 }

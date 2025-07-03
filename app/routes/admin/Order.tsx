@@ -43,9 +43,9 @@ export default function Order() {
                 });
             }
 
-            if (res.data?.content) {
-                setOrders(res.data.content);
-                setTotalPages(res.data.totalPages);
+            if (res.data?.data?.content) {
+                setOrders(res.data.data.content);
+                setTotalPages(res.data.data.totalPages);
             }
         } catch (err) {
             console.error("Error fetching orders:", err);
@@ -91,12 +91,7 @@ export default function Order() {
 
     const handleDelete = async (orderId: number, userId: number | null, sessionId?: string) => {
         try {
-            const uid = userId ?? 0;
-            const url = sessionId
-                ? `/order/delete/${uid}/${orderId}?sessionId=${sessionId}`
-                : `/order/delete/${uid}/${orderId}`;
-
-            await axiosInstance.delete(url);
+            await axiosInstance.delete(`/order/delete/${orderId}`);
             // If we're on the last page and delete the last item, go to previous page
             if (orders.length === 1 && page > 0) {
                 setPage(page - 1);
@@ -142,14 +137,16 @@ export default function Order() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
-                                    <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -164,11 +161,18 @@ export default function Order() {
                                 ) : orders.length > 0 ? (
                                     orders.map(order => (
                                         <tr key={order.id} className="hover:bg-gray-50">
-                                            <td className="px-5 py-3 whitespace-nowrap">{order.id}</td>
-                                            <td className="px-5 py-3 whitespace-nowrap">{order.name}</td>
-                                            <td className="px-5 py-3 whitespace-nowrap">{order.totalAmount?.toLocaleString()}₫</td>
-                                            <td className="px-5 py-3 max-w-xs truncate">{order.note}</td>
-                                            <td className="px-5 py-3 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">{order.id}</td>
+                                            <td className="px-3 py-3 whitespace-nowrap">{order.addressDTO
+                                                ? `${order.addressDTO.receiverName}`
+                                                : <span className="italic text-gray-400">Chưa có ten</span>}</td>
+
+                                            <td className="px-3 py-3 whitespace-nowrap">{order.totalAmount?.toLocaleString()}₫</td>
+                                            <td className="px-3 py-3 max-w-xs truncate">{order.addressDTO
+                                                ? `${order.addressDTO.phoneNumber}`
+                                                : <span className="italic text-gray-400">Chưa có sdt</span>
+                                            }</td>
+                                            <td className="px-3 py-3 max-w-xs truncate">{order.note}</td>
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <span className={`
                                                     px-2 py-1 rounded-full text-xs font-semibold
                                                     ${order.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : ""}
@@ -181,11 +185,19 @@ export default function Order() {
                                                     {order.status}
                                                 </span>
                                             </td>
-                                            <td className="px-10 py-4 whitespace-nowrap">{order.paymentMethod}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-4 whitespace-nowrap">
+                                                {order.addressDTO
+                                                    ? `${order.addressDTO.homeAddress} - ${order.addressDTO.commune} - ${order.addressDTO.district} - ${order.addressDTO.city}`
+                                                    : <span className="italic text-gray-400">Chưa có địa chỉ</span>
+                                                }
+                                            </td>
+
+
+                                            <td className="px-3 py-4 whitespace-nowrap">{order.paymentMethod}</td>
+                                            <td className="px-3 py-4 whitespace-nowrap">
                                                 {new Date(order.orderDate).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-4 whitespace-nowrap">
                                                 <div className="flex space-x-2">
                                                     <button
                                                         onClick={() => handleEditClick(order)}
@@ -305,7 +317,7 @@ export default function Order() {
                     onClose={() => setHistoryDialogOpen(false)}
                     items={selectedOrderDetails}
                 />
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

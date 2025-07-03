@@ -5,6 +5,7 @@ import Header from "~/components/Header";
 import ConfirmDialog from "~/components/ConfirmDialog";
 import { getUserIdFromToken } from "~/utils/authUtils";
 
+
 export default function Cart() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -23,29 +24,7 @@ export default function Cart() {
 
     // Lấy giỏ hàng theo user hoặc sessionId
     useEffect(() => {
-        const fetchCart = async () => {
-            setLoading(true);
-            try {
-                if (userId) {
-                    const res = await axiosInstance.get("/cart");
-                    setCartItems(res.data.cartItems || []);
-                } else {
-                    const sessionId = localStorage.getItem("sessionId");
-                    if (sessionId) {
-                        const res = await axiosInstance.get("/cart/session", { params: { sessionId } });
-                        setCartItems(res.data.cartItems || []);
-                    } else {
-                        setCartItems([]);
-                    }
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy giỏ hàng:", error);
-                setCartItems([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCart();
+        reloadCart();
     }, [userId]);
 
     const reloadCart = async () => {
@@ -53,12 +32,13 @@ export default function Cart() {
         try {
             if (userId) {
                 const res = await axiosInstance.get("/cart");
-                setCartItems(res.data.cartItems || []);
+                setCartItems(res.data.data.cartItems || []);
             } else {
                 const sessionId = localStorage.getItem("sessionId");
                 if (sessionId) {
                     const res = await axiosInstance.get("/cart/session", { params: { sessionId } });
-                    setCartItems(res.data.cartItems || []);
+                    setCartItems(res.data.data.cartItems || []);
+                    console.log("sessionId: " + sessionId);
                 } else {
                     setCartItems([]);
                 }
@@ -71,12 +51,12 @@ export default function Cart() {
         }
     };
 
-    // Tăng số lượng sản phẩm
+    //Them, tang sl sản phẩm vào giỏ hàng
     const handleIncrease = async (item: CartItem) => {
         setBtnLoadingId(item.id);
         try {
             const data = {
-                product: { id: item.product.id },
+                productId: item.product.id,
                 quantity: 1,
                 price: item.product.price,
             };
@@ -100,16 +80,17 @@ export default function Cart() {
         setBtnLoadingId(item.id);
         try {
             const updatedQuantity = item.quantity - 1;
-            const updatedCartItemDTO = {
-                product: { id: item.product.id },
+            const data = {
+                productId: item.product.id,
                 quantity: updatedQuantity,
-                price: item.price,
-            };
+                price: item.product.price,
+            }; console.log("updatedCartItemDT: " + data);
             if (userId) {
-                await axiosInstance.post("/cart/update", updatedCartItemDTO);
+                await axiosInstance.put("/cart/update", data);
+
             } else {
                 const sessionId = localStorage.getItem("sessionId");
-                await axiosInstance.post(`/cart/session/update?sessionId=${sessionId}`, { ...updatedCartItemDTO });
+                await axiosInstance.put(`/cart/session/update?sessionId=${sessionId}`, { ...data });
             }
             await reloadCart();
         } catch (error) {
@@ -183,7 +164,8 @@ export default function Cart() {
             if (sessionId) params.sessionId = sessionId;
 
             const res = await axiosInstance.get("order/history", { params });
-            setOrderHistory(res.data || []);
+            setOrderHistory(res.data.data?.content || []);
+
         } catch (error) {
             console.error("Lỗi khi lấy lịch sử đơn hàng:", error);
             setOrderHistory([]);
@@ -229,7 +211,7 @@ export default function Cart() {
                             </div>
 
                             <div className="grid md:grid-cols-1 gap-5 ">
-                                {cartItems.map((item) => (
+                                {cartItems?.map((item) => (
                                     <div
                                         key={item.id}
                                         className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-[#8B5E3C]"
@@ -237,13 +219,14 @@ export default function Cart() {
                                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                             <div className="flex items-center gap-4 w-full">
                                                 <img
-                                                    src={item.product.imageUrl || "/default.png"}
-                                                    alt={item.product.name}
-                                                    className="w-20 h-20 rounded-full object-cover border-2 border-[#8B5E3C] flex-shrink-0"
+                                                    src={item.product?.imageUrl || "/default.png"}
+                                                    alt={item.product?.namePro || "Sản phẩm"}
+                                                    className="w-20 h-20 object-cover rounded border border-gray-200"
                                                 />
+
                                                 <div className="flex-grow">
                                                     <h3 className="font-bold text-gray-800 text-lg">
-                                                        <span className="font-bold text-gray-800 text-lg mb-1">{item.product.name}</span>
+                                                        <span className="font-bold text-gray-800 text-lg mb-1">{item.product.namePro}</span>
                                                     </h3>
                                                     <div className="flex items-center gap-2 mt-3">
                                                         <button

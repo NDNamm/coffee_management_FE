@@ -41,9 +41,9 @@ export default function Product() {
                 });
             }
 
-            if (res.data?.content) {
-                setProducts(res.data.content);
-                setTotalPages(res.data.totalPages);
+            if (res.data?.data?.content) {
+                setProducts(res.data.data.content);
+                setTotalPages(res.data.data.totalPages);
             }
         } catch (err) {
             console.error("Error fetching products:", err);
@@ -158,12 +158,12 @@ export default function Product() {
                                     products.map(product => (
                                         <tr key={product.id} className="hover:bg-gray-50">
                                             <td className="px-5 py-3 whitespace-nowrap">{product.id}</td>
-                                            <td className="px-5 py-3 whitespace-nowrap">{product.name}</td>
+                                            <td className="px-5 py-3 whitespace-nowrap">{product.namePro}</td>
                                             <td className="px-5 py-3 whitespace-nowrap">
                                                 {product.imageUrl?.[0] && (
                                                     <img
                                                         src={product.imageUrl}
-                                                        alt={product.name}
+                                                        alt={product.namePro}
                                                         className="h-12 w-16 object-cover rounded mx-auto"
                                                     />
                                                 )}

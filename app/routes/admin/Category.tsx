@@ -42,10 +42,11 @@ export default function Category() {
                 });
             }
 
-            if (res.data?.content) {
-                setCategories(res.data.content);
-                setTotalPages(res.data.totalPages);
+            if (res.data?.data?.content) {
+                setCategories(res.data.data.content);
+                setTotalPages(res.data.data.totalPages);
             }
+
         } catch (error) {
             console.error("Error fetching categories:", error);
         } finally {
@@ -155,12 +156,12 @@ export default function Category() {
                                     categories.map(cate => (
                                         <tr key={cate.id} className="hover:bg-gray-50">
                                             <td className="px-5 py-3 whitespace-nowrap">{cate.id}</td>
-                                            <td className="px-5 py-3 whitespace-nowrap">{cate.name}</td>
+                                            <td className="px-5 py-3 whitespace-nowrap">{cate.nameCate}</td>
                                             <td className="px-5 py-3 whitespace-nowrap">
                                                 {cate.imageUrl && (
                                                     <img
                                                         src={cate.imageUrl}
-                                                        alt={cate.name}
+                                                        alt={cate.nameCate}
                                                         className="h-12 w-16 object-cover rounded"
                                                     />
                                                 )}

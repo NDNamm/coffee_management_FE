@@ -9,7 +9,7 @@ export const getUserIdFromToken = (): string | null => {
 
     try {
         const decoded: any = jwtDecode(token);
-        return decoded.sub || decoded.id || decoded.userId || decoded.roles || decoded.fullName;
+        return decoded.sub || decoded.id || decoded.userId || decoded.roles || decoded.fullName || decoded.phoneNumber || null;
     } catch (err) {
         console.error("Invalid token", err);
         return null;
