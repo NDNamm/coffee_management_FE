@@ -11,11 +11,11 @@ export default [
   },
   {
     path: "/product",
-    file: "routes/productPage.tsx",
+    file: "routes/ProductPage.tsx",
   },
   {
     path: "/category",
-    file: "routes/categoryPage.tsx",
+    file: "routes/CategoryPage.tsx",
   },
   {
     path: "/cart",
